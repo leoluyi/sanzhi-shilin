@@ -1,6 +1,8 @@
 library(Rfacebook)
 library(data.table)
 library(magrittr)
+library(parsedate)
+source("utils/fb_description_parser.R")
 
 # get API token -----------------------------------------------------------
 
@@ -13,15 +15,19 @@ library(magrittr)
 
 # Get data ----------------------------------------------------------------
 
+# 阮厝住三芝 https://www.facebook.com/groups/451870225491/about/
+
 # Get all posts
-posts_aboutkeelung <- getPage(page_aboutkeelung$username,
-                              token=fb_oauth, n = 30000,
-                              since = as.Date("2014-09-01")) %>%
-  as_data_frame() %>%
-  mutate(created_date = as.Date(created_time))
+posts <- getGroup("451870225491",
+                  token=fb_oauth, n = 3000000,
+                  since = as.Date("2015-01-01")) %>%
+  setDT() %>%
+  .[, created_date := parse_iso_8601(created_time)]
 
 # Parse link
-posts_aboutkeelung <- posts_aboutkeelung %>%
-  mutate(link_description = parse_description(link)) %>%
-  mutate(message_link = paste0(message, link_description, collapse = " "))
+posts[is.na(message) & type != "status", 
+      message := parse_description(link)]
 
+# Export ------------------------------------------------------------------
+
+posts %>% fwrite("data/dt_sanzhi_fb.csv")
