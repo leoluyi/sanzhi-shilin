@@ -4,12 +4,12 @@ library(magrittr)
 
 # get API token -----------------------------------------------------------
 
-fb_oauth <- fbOAuth(app_id="1667711623447142",
-                    app_secret="******",
-                    extended_permissions = TRUE)
-dir.create("./fb_oauth", showWarnings = FALSE)
-save(fb_oauth, file="./fb_oauth/fb_oauth")
-
+# https://developers.facebook.com/apps
+# fb_oauth <- fbOAuth(app_id="1667711623447142",
+#                     app_secret="****************",
+#                     extended_permissions = TRUE)
+# dir.create("./fb_oauth", showWarnings = FALSE)
+# save(fb_oauth, file="./fb_oauth/fb_oauth")
 
 # Get data ----------------------------------------------------------------
 
