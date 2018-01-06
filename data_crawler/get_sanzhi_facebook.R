@@ -1,6 +1,7 @@
 library(Rfacebook)
 library(data.table)
 library(magrittr)
+library(stringr)
 library(parsedate)
 library(bit64) # for bit64 data
 library(parallel)
@@ -68,4 +69,6 @@ posts[comments_count > 0, comments := get_comments(id, fb_oauth)]
 
 # Export ------------------------------------------------------------------
 
+posts <- posts %>% unique(by = "message")
+posts <- posts[str_count(message) > 0]
 # posts %>% fwrite("data/dt_sanzhi_fb.csv")
