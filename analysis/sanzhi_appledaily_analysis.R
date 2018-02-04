@@ -18,6 +18,7 @@ library(slam) # sparse matrix
 library(parsedate)
 library(parallel)
 # devtools::install_github("qinwf/ropencc") # 繁簡轉換
+source("utils/filter_dtm.R", local = TRUE)
 options(
   datatable.print.class = TRUE,
   datatable.print.topn = 20
@@ -134,19 +135,29 @@ text_token <- itoken(text_seg)
 
 # 新詞探勘 ------------------------------------------------------------------
 
-# unique word matrix
-vocab <- create_vocabulary(text_token, ngram=c(1L, 3L), sep_ngram = "_")
+# Unique word matrix
+vocab <- create_vocabulary(
+  text_token, 
+  ngram=c(1L, 2L),
+  sep_ngram = "_"
+)
+
 pruned_vocab <- prune_vocabulary(
-  vocab, term_count_min = 10, doc_proportion_max = 0.8,
-  doc_proportion_min = 0.001, vocab_term_max = 20000)
+  vocab, 
+  term_count_min = 15, 
+  doc_proportion_min = 0.05, 
+  doc_proportion_max = 0.9,
+  vocab_term_max = 20000
+)
+# class(pruned_vocab) <- c("text2vec_vocabulary", "data.table", "data.frame")
+pruned_vocab <- pruned_vocab[str_length(pruned_vocab$term) >= 2,] # remove 1-word term
 
-# dtm
-vectorizer <- vocab_vectorizer(vocab)
+# Make DTM
+vectorizer <- vocab_vectorizer(pruned_vocab)
 dtm <- create_dtm(text_token, vectorizer)
-# remove 1-word term
-dtm <- dtm[, dtm %>% colnames() %>% nchar >= 2]
 
-# dtm %>% find_freq_terms(30) # not good
+# Check most freq terms
+dtm %>% colSums() %>% sort(decreasing = T) %>% head(20)
 
 # 關鍵詞 Top 100 ------------------------------------------------------------
 
@@ -160,19 +171,19 @@ dtm_train_tfidf = fit_transform(dtm, tfidf)
 
 # Key term
 key_term <- dtm_train_tfidf %>% 
-  find_freq_terms(lowfreq = 0.05) %>% 
+  find_freq_terms(lowfreq = 0.05) %>%
   colSums() %>% 
   data.frame() %>% 
   data.table(keep.rownames = TRUE) %>% 
   setnames(c("keyword", "sum_tf_idf")) %>% 
   .[order(-sum_tf_idf)]
-key_term %>% head(100) %>% DT::datatable(extensions = "Responsive")
+# key_term %>% head(100) %>% DT::datatable(extensions = "Responsive")
 
 # Wordcloud
 d <- key_term %>% head(200)
 ncolor <- nrow(d)
 getPalette = colorRampPalette(RColorBrewer::brewer.pal(8, "Set2"))
-wordcloud2(d, 
+wordcloud2(d,
            size = 0.5,
            fontFamily = "Noto Sans CJK TC", 
            fontWeight = "normal",
