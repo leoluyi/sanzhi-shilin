@@ -19,6 +19,8 @@ library(parsedate)
 library(parallel)
 # devtools::install_github("qinwf/ropencc") # 繁簡轉換
 source("utils/filter_dtm.R", local = TRUE)
+source("utils/seglist_to_dtm.R", local = TRUE)
+source("utils/cutter.R", local = TRUE)
 options(
   datatable.print.class = TRUE,
   datatable.print.topn = 20
@@ -91,21 +93,6 @@ hmm_seg <- worker(type = "hmm",
 
 # self-made filter (built-in perl's regular expression has bug)
 filter_words = readLines("dict/filter_words.txt")
-cutter <- function (text, seg_worker, filter_words) {
-  # text = "馬英九去世新大學演講"
-  if (text %in% c(".", "")) {
-    return(NA_character_)
-  }
-  
-  pattern <- sprintf("^%s", paste(filter_words, collapse = "|^"))
-  tryCatch({
-    text_seg <- seg_worker <= text
-  }, error = function(e) {
-    stop('"', text, '" >> ', e)
-  })
-  filter_seg <- text_seg[!stringr::str_detect(text_seg, pattern)]
-  filter_seg
-}
 
 # tokenize
 text_seg <- dt[, news_text] %>% lapply(cutter, mix_seg, filter_words)
@@ -191,4 +178,110 @@ wordcloud2(d,
            color = getPalette(ncolor),
            shape = "circle")
 
+
+# Topic Models ------------------------------------------------------------
+
+doc_list <- dt[, news_text] %>% 
+  lapply(cutter, mix_seg, filter_words) %>% 
+  lapply(function(x) x[!is.na(x)]) 
+dtm <- doc_list %>% seglist_to_dtm %>% filter_tfidf_dtm
+# dtm <- dtm %>% as.simple_triplet_matrix
+
+# compute the table of terms:
+term_table <- dtm %>% slam::col_sums()
+term_table <- sort(term_table, decreasing = TRUE)
+
+# remove terms that are stop words or occur fewer than 5 times:
+del <- term_table < 5 | names(term_table) %>% str_length == 1
+term_table <- term_table[!del]
+vocab <- names(term_table)
+
+get_terms <- function(doc_list, vocab) {
+  index <- match(doc_list, vocab)
+  index <- index[!is.na(index)]
+  rbind(as.integer(index - 1), as.integer(rep(1, length(index))))
+}
+documents <- lapply(doc_list, get_terms, vocab=vocab)
+
+# Compute some statistics related to the data set:
+D <- length(documents)  # number of documents (2,000)
+W <- length(vocab)  # number of terms in the vocab (14,568)
+doc.length <- sapply(documents, function(x) sum(x[2, ]))  # number of tokens per document [312, 288, 170, 436, 291, ...]
+N <- sum(doc.length)  # total number of tokens in the data (546,827)
+term.frequency <- as.integer(term_table)  # frequencies of terms in the corpus
+
+# 跑個模擬，挑一個好的主題數
+
+# https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
+system.time({
+  result <- FindTopicsNumber(
+    dtm,
+    topics = c(seq(2, 6, by = 2),
+               seq(10, 60, by = 5),
+               seq(60, 100, by = 20)#,
+               # seq(120, 200, by = 20)
+    ),
+    metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010"),
+    method = "Gibbs",
+    control = list(seed = 77),
+    mc.cores = 3L,
+    verbose = TRUE
+  )
+}) # Time difference of 3.317039 mins
+
+FindTopicsNumber_plot(result)
+
+# MCMC and model tuning parameters:
+K <- 45  # n_topic
+G <- 3000 # num.iterations
+alpha <- 0.02
+eta <- 0.02
+
+# Fit the model:
+set.seed(357)
+system.time({
+  lda_fit <- lda.collapsed.gibbs.sampler(
+    documents = documents, K = K, vocab = vocab, 
+    num.iterations = G, alpha = alpha, 
+    eta = eta, initial = NULL, burnin = 0,
+    compute.log.likelihood = TRUE)
+  # Save result
+  saveRDS(lda_fit, file = "./models/lda_fit_appledaily.Rds")
+})
+#   user  system elapsed 
+# 77.780   0.552  78.693 
+
+# Top topic result
+top_docs_num <- lda_fit$document_sums %>% top.topic.documents(5)
+top_words <- lda_fit$topics %>% top.topic.words(num.words = 5, by.score = TRUE) %>% 
+  data.frame() %>% data.table()
+
+top_words %>% 
+ DT::datatable()
+
+
+# LDAvis
+
+theta <- t(apply(lda_fit$document_sums + alpha, 2, function(x) x/sum(x)))
+phi <- t(apply(t(lda_fit$topics) + eta, 2, function(x) x/sum(x)))
+
+# list(phi = phi,
+#      theta = theta,
+#      doc.length = doc.length,
+#      vocab = vocab,
+#      term.frequency = term.frequency)
+
+lda_view <- list(phi = phi,
+                 theta = theta,
+                 doc.length = doc.length,
+                 vocab = vocab,
+                 term.frequency = term.frequency)
+
+# create the JSON object to feed the visualization:
+json <- createJSON(phi = lda_view$phi, 
+                   theta = lda_view$theta, 
+                   doc.length = lda_view$doc.length, 
+                   vocab = lda_view$vocab, 
+                   term.frequency = lda_view$term.frequency)
+serVis(json, out.dir = 'output/ldavis_appledaily', open.browser = FALSE)
 

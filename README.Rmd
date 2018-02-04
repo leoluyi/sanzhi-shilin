@@ -1,0 +1,86 @@
+---
+title: "三芝輿情文本探勘"
+output: 
+  md_document:
+    variant: markdown_github
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+library(data.table)
+library(magrittr)
+library(stringr)
+library(kableExtra)
+library(lda)
+```
+
+針對三芝區（主要）
+議題可鎖定在區域問題、產業發展、健康照護等面向
+
+## 蘋果日報
+
+- 資料期間：2016-01-01 ~ 2017-12-28
+- 搜尋字：三芝
+- 文章篩選：新聞分類為「頭條要聞, 論壇, 副刊, 財經, 生活」的文章，共 215 篇
+
+### 關鍵字
+
+[關鍵字文字雲 (Click)](http://blog.leoluyi.ml/sanzhi-shilin/output/appledaily_keyword_wordcloud.html)
+
+```{r appledaily wordcoud}
+dt_raw <- fread("data/dt_sanzhi_appledaily_2016_2017.csv")
+# remove duplicate news
+dt_raw <- dt_raw %>% unique(by = "title")
+# setindex(dt_raw, keywords)
+# dt_raw[, .N, keywords][order(-N)]
+```
+
+### 
+
+**老人 - 相關新聞**
+
+```{r}
+dt_raw[str_detect(news_text, "老[翁人化]"), 
+       .(title, datetime, keyword = str_extract_all(news_text, ".{6}老[翁人化].{6}"))] %>% 
+  knitr::kable("html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) 
+```
+
+### 
+
+**長照 - 相關新聞**
+
+```{r}
+dt_raw[str_detect(news_text, "長照"),
+       .(title, datetime, keyword = str_extract_all(news_text, ".{6}長照.{6}"))] %>%
+  knitr::kable("html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### LDA 主題模型
+
++ [LDAvis (Click)](output/ldavis_appledaily/)
++ 參數
+    - n_topic: 45
+    - num.iterations: 3000
+    - alpha: 0.02
+    - eta: 0.02
+
+```{r}
+lda_fit <- readRDS("./models/lda_fit_appledaily.Rds")
+# Top topic result
+top_docs_num <- lda_fit$document_sums %>% top.topic.documents(5)
+top_words <- lda_fit$topics %>% top.topic.words(num.words = 5, by.score = TRUE) %>% 
+  data.frame() %>% data.table()
+
+top_words %>% 
+  knitr::kable("html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
