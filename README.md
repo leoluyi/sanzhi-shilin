@@ -9,7 +9,7 @@
 
 ### 關鍵字
 
-[關鍵字文字雲 (Click)](http://blog.leoluyi.ml/sanzhi-shilin/output/appledaily_keyword_wordcloud.html)
+[關鍵字文字雲 (Click)](/output/appledaily_keyword_wordcloud.html)
 
 ### 
 
@@ -1150,6 +1150,405 @@ X45
 </td>
 <td style="text-align:left;">
 發生
+</td>
+</tr>
+</tbody>
+</table>
+FB - 「阮厝住三芝」社團
+-----------------------
+
+[阮厝住三芝](https://www.facebook.com/groups/451870225491/about/)
+
+-   資料期間：2015-01-01 ~ 2017-12-28
+-   273 篇發文，含回應留言 (手動排除買賣文 13 篇後)
+
+### 關鍵字
+
+-   [關鍵字文字雲 (Click)](/output/fb_keyword_wordcloud.html)
+
+### LDA 主題模型
+
+-   [LDAvis (Click)](output/ldavis_fb/)
+-   參數
+    -   n\_topic: 20
+    -   num.iterations: 3000
+    -   alpha: 0.02
+    -   eta: 0.02
+
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+X1
+</th>
+<th style="text-align:left;">
+X2
+</th>
+<th style="text-align:left;">
+X3
+</th>
+<th style="text-align:left;">
+X4
+</th>
+<th style="text-align:left;">
+X5
+</th>
+<th style="text-align:left;">
+X6
+</th>
+<th style="text-align:left;">
+X7
+</th>
+<th style="text-align:left;">
+X8
+</th>
+<th style="text-align:left;">
+X9
+</th>
+<th style="text-align:left;">
+X10
+</th>
+<th style="text-align:left;">
+X11
+</th>
+<th style="text-align:left;">
+X12
+</th>
+<th style="text-align:left;">
+X13
+</th>
+<th style="text-align:left;">
+X14
+</th>
+<th style="text-align:left;">
+X15
+</th>
+<th style="text-align:left;">
+X16
+</th>
+<th style="text-align:left;">
+X17
+</th>
+<th style="text-align:left;">
+X18
+</th>
+<th style="text-align:left;">
+X19
+</th>
+<th style="text-align:left;">
+X20
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+有人
+</td>
+<td style="text-align:left;">
+支持
+</td>
+<td style="text-align:left;">
+環評
+</td>
+<td style="text-align:left;">
+預約
+</td>
+<td style="text-align:left;">
+天氣
+</td>
+<td style="text-align:left;">
+新年快樂
+</td>
+<td style="text-align:left;">
+早上
+</td>
+<td style="text-align:left;">
+明天
+</td>
+<td style="text-align:left;">
+有人
+</td>
+<td style="text-align:left;">
+好吃
+</td>
+<td style="text-align:left;">
+白沙灣
+</td>
+<td style="text-align:left;">
+美麗
+</td>
+<td style="text-align:left;">
+您們
+</td>
+<td style="text-align:left;">
+媽媽
+</td>
+<td style="text-align:left;">
+報名
+</td>
+<td style="text-align:left;">
+中興
+</td>
+<td style="text-align:left;">
+淡水
+</td>
+<td style="text-align:left;">
+留言
+</td>
+<td style="text-align:left;">
+藥局
+</td>
+<td style="text-align:left;">
+加入
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+自取
+</td>
+<td style="text-align:left;">
+鄉親們
+</td>
+<td style="text-align:left;">
+支持
+</td>
+<td style="text-align:left;">
+寵物
+</td>
+<td style="text-align:left;">
+淺水灣
+</td>
+<td style="text-align:left;">
+生活
+</td>
+<td style="text-align:left;">
+冰箱
+</td>
+<td style="text-align:left;">
+漂亮
+</td>
+<td style="text-align:left;">
+社區
+</td>
+<td style="text-align:left;">
+這家
+</td>
+<td style="text-align:left;">
+八連
+</td>
+<td style="text-align:left;">
+海岸線
+</td>
+<td style="text-align:left;">
+垃圾車
+</td>
+<td style="text-align:left;">
+可愛
+</td>
+<td style="text-align:left;">
+出聲
+</td>
+<td style="text-align:left;">
+救援
+</td>
+<td style="text-align:left;">
+中正
+</td>
+<td style="text-align:left;">
+外牆
+</td>
+<td style="text-align:left;">
+金山
+</td>
+<td style="text-align:left;">
+晚上
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+到場
+</td>
+<td style="text-align:left;">
+危害
+</td>
+<td style="text-align:left;">
+業者
+</td>
+<td style="text-align:left;">
+電梯
+</td>
+<td style="text-align:left;">
+下雨
+</td>
+<td style="text-align:left;">
+健康
+</td>
+<td style="text-align:left;">
+冷媒
+</td>
+<td style="text-align:left;">
+村民
+</td>
+<td style="text-align:left;">
+開放
+</td>
+<td style="text-align:left;">
+衣服
+</td>
+<td style="text-align:left;">
+淺水灣
+</td>
+<td style="text-align:left;">
+珊瑚
+</td>
+<td style="text-align:left;">
+當年
+</td>
+<td style="text-align:left;">
+圖書館
+</td>
+<td style="text-align:left;">
+便當
+</td>
+<td style="text-align:left;">
+湯圓
+</td>
+<td style="text-align:left;">
+封閉
+</td>
+<td style="text-align:left;">
+閱讀
+</td>
+<td style="text-align:left;">
+牙齒
+</td>
+<td style="text-align:left;">
+假日
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+使用
+</td>
+<td style="text-align:left;">
+公路
+</td>
+<td style="text-align:left;">
+結論
+</td>
+<td style="text-align:left;">
+申請
+</td>
+<td style="text-align:left;">
+煙火
+</td>
+<td style="text-align:left;">
+傷害
+</td>
+<td style="text-align:left;">
+上課
+</td>
+<td style="text-align:left;">
+電視
+</td>
+<td style="text-align:left;">
+派出所
+</td>
+<td style="text-align:left;">
+老闆娘
+</td>
+<td style="text-align:left;">
+自行車
+</td>
+<td style="text-align:left;">
+車位
+</td>
+<td style="text-align:left;">
+後面
+</td>
+<td style="text-align:left;">
+快樂
+</td>
+<td style="text-align:left;">
+淡水
+</td>
+<td style="text-align:left;">
+領養
+</td>
+<td style="text-align:left;">
+東路
+</td>
+<td style="text-align:left;">
+整理
+</td>
+<td style="text-align:left;">
+中正路
+</td>
+<td style="text-align:left;">
+興趣
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+學生
+</td>
+<td style="text-align:left;">
+加油
+</td>
+<td style="text-align:left;">
+不當
+</td>
+<td style="text-align:left;">
+房子
+</td>
+<td style="text-align:left;">
+餐廳
+</td>
+<td style="text-align:left;">
+祝福
+</td>
+<td style="text-align:left;">
+詐騙
+</td>
+<td style="text-align:left;">
+工作
+</td>
+<td style="text-align:left;">
+電話
+</td>
+<td style="text-align:left;">
+美食
+</td>
+<td style="text-align:left;">
+自行車道
+</td>
+<td style="text-align:left;">
+風大
+</td>
+<td style="text-align:left;">
+昨天
+</td>
+<td style="text-align:left;">
+流星
+</td>
+<td style="text-align:left;">
+現場
+</td>
+<td style="text-align:left;">
+動物
+</td>
+<td style="text-align:left;">
+分局
+</td>
+<td style="text-align:left;">
+送出
+</td>
+<td style="text-align:left;">
+開車
+</td>
+<td style="text-align:left;">
+最近
 </td>
 </tr>
 </tbody>

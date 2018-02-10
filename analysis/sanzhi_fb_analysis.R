@@ -43,22 +43,42 @@ dt_raw[, .(comments_count)] %>%
   theme_light()
 
 dt_raw[comments_count > 12, .(message)][
-  str_detect(message, "[貨買賣]|面交")]
+  str_detect(message, "[貨買賣]|面交")] %>% View
+# #現貨100組明天下午到貨 #大優惠快搶慢了就沒了喔‼️ #
+# 三芝胖老爹生意超好 ，11開賣下午4點賣光了。我都沒吃到
+# ＃老饕甘蔗烤雞最新出團時間
+# ✨✨金山隱藏版鹹酥鴨✨✨ ✅到貨日12/29（五）取貨✅ ⚠
+# 信杰寵物滿7歲 慶祝活動第二波來了 Flexi 飛萊希伸縮拉
+# 三芝有一家魯味 下午5點左右開三個人在賣 很快就賣完了 但 
+# 信杰寵物 7歲慶祝活動 第三波 2017.12.18 老闆重
+# 三芝古早味純手工製作湯圓，家中母親製作，完全無防腐劑1斤70
+# 親愛的三芝鄉親們，冬至將要來臨囉！這時候就要應景吃個湯圓囉！
+# �手工牛軋餅� NT$150 - 三芝區 #現貨 #快速出貨
+# 謝謝大家幫忙！我更新照片唷！ 各位鄉親！由於本人懶，所以半賣
+# 請問靠近三芝國小附近有農舍要賣的嗎？要有院子喔。
+# 可口美味雪Q餅
 
+dt <- dt_raw[!str_detect(message, "[貨買賣]|面交") & comments_count <= 12]
 
 #  Data cleansing ---------------------------------------------------------
 
-url_re <- "(https?|ftp)://[^\\s/$.?#].[^\\s]"
+url_re <- "http[s]?://(?:[a-zA-Z0-9$-_@.&+!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+(?:#[-A-z0-9]+)?"
+emoji_re <- paste0("(\ud83d[\ude00-\ude4f])|",  # emoticons
+                   "(\ud83c[\udf00-\uffff])|",  # symbols & pictographs (1 of 2)
+                   "(\ud83d[\u0001-\uddff])|",  # symbols & pictographs (2 of 2)
+                   "(\ud83d[\ude80-\udeff])|",  # transport & map symbols
+                   "(\ud83c[\udde0-\uddff])") # flags (iOS)
 
-dt[, news_text := news_text %>% 
-     str_replace_all(url_re, "") %>% 
-     str_replace_all("\\p{So}|\\p{C}", "")] # Unicode Regular Expressions
-dt[, news_text := news_text %>% str_replace_all(url_re, "")]
-# Remove author
-dt[, news_text := news_text %>%
-     str_replace("([【(（]).*?(更新|新增|報導).*?[】)）]", "")]
+dt[, `:=`(message = message %>% 
+            str_replace_all(url_re, "") %>% 
+            str_replace_all("\\p{So}|\\p{C}", "") %>%  # Unicode Regular Expressions
+            str_replace_all("[^\u0020-\u007A\u4E00-\u9FFF]+", " "))]
+dt[, `:=`(comments = comments %>% 
+            str_replace_all(url_re, "") %>% 
+            str_replace_all("\\p{So}|\\p{C}", "") %>% 
+            str_replace_all("[^\u0020-\u007A\u4E00-\u9FFF]+", " "))]
 # Remove empty news
-dt <- dt[news_text != ""]
+dt <- dt[message != ""]
 
 # tokenize ----------------------------------------------------------------
 
@@ -79,7 +99,7 @@ hmm_seg <- worker(type = "hmm",
 filter_words = readLines("dict/filter_words.txt")
 
 # tokenize
-text_seg <- dt[, news_text] %>% lapply(cutter, mix_seg, filter_words)
+text_seg <- dt[, paste(message, comments)] %>% lapply(cutter, mix_seg, filter_words)
 
 # # tokenize in parallel
 # cl <- makeCluster(detectCores()-1)
@@ -115,8 +135,8 @@ vocab <- create_vocabulary(
 
 pruned_vocab <- prune_vocabulary(
   vocab, 
-  term_count_min = 15, 
-  doc_proportion_min = 0.05, 
+  term_count_min = 5, 
+  doc_proportion_min = 0.01, 
   doc_proportion_max = 0.9,
   vocab_term_max = 20000
 )
@@ -151,7 +171,7 @@ key_term <- dtm_train_tfidf %>%
 # key_term %>% head(100) %>% DT::datatable(extensions = "Responsive")
 
 # Wordcloud
-d <- key_term %>% head(200)
+d <- key_term %>% head(150)
 ncolor <- nrow(d)
 get_palette = colorRampPalette(RColorBrewer::brewer.pal(8, "Set2")) 
               # interpolate a set of given colors 
@@ -166,7 +186,7 @@ wordcloud2(d,
 
 # Topic Models ------------------------------------------------------------
 
-doc_list <- dt[, news_text] %>% 
+doc_list <- dt[, paste(message, comments)] %>% 
   lapply(cutter, mix_seg, filter_words) %>% 
   lapply(function(x) x[!is.na(x)]) 
 dtm <- doc_list %>% seglist_to_dtm %>% filter_tfidf_dtm
@@ -199,7 +219,7 @@ term.frequency <- as.integer(term_table)  # frequencies of terms in the corpus
 
 # https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
 system.time({
-  result <- FindTopicsNumber(
+  sim_result <- FindTopicsNumber(
     dtm,
     topics = c(seq(2, 6, by = 2),
                seq(10, 60, by = 5),
@@ -212,12 +232,12 @@ system.time({
     mc.cores = 3L,
     verbose = TRUE
   )
-}) # Time difference of 3.317039 mins
+}) # Time difference of 43.448 secs
 
-FindTopicsNumber_plot(result)
+FindTopicsNumber_plot(sim_result)
 
 # MCMC and model tuning parameters:
-K <- 45  # n_topic
+K <- 20  # n_topic
 G <- 3000 # num.iterations
 alpha <- 0.02
 eta <- 0.02
@@ -231,10 +251,10 @@ system.time({
     eta = eta, initial = NULL, burnin = 0,
     compute.log.likelihood = TRUE)
   # Save result
-  saveRDS(lda_fit, file = "./models/lda_fit_appledaily.Rds")
+  saveRDS(lda_fit, file = "./models/lda_fit_fb.Rds")
 })
-#   user  system elapsed 
-# 77.780   0.552  78.693 
+#  user  system elapsed 
+# 6.252   0.420   6.688
 
 # Top topic result
 top_docs_num <- lda_fit$document_sums %>% top.topic.documents(5)
@@ -268,5 +288,5 @@ json <- createJSON(phi = lda_view$phi,
                    doc.length = lda_view$doc.length, 
                    vocab = lda_view$vocab, 
                    term.frequency = lda_view$term.frequency)
-serVis(json, out.dir = 'output/ldavis_appledaily', open.browser = FALSE)
+serVis(json, out.dir = 'output/ldavis_fb', open.browser = FALSE)
 

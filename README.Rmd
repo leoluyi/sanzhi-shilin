@@ -31,7 +31,7 @@ library(lda)
 
 ### 關鍵字
 
-[關鍵字文字雲 (Click)](http://blog.leoluyi.ml/sanzhi-shilin/output/appledaily_keyword_wordcloud.html)
+[關鍵字文字雲 (Click)](/output/appledaily_keyword_wordcloud.html)
 
 ```{r appledaily wordcoud}
 dt_raw <- fread("data/dt_sanzhi_appledaily_2016_2017.csv")
@@ -74,6 +74,39 @@ dt_raw[str_detect(news_text, "長照"),
 
 ```{r}
 lda_fit <- readRDS("./models/lda_fit_appledaily.Rds")
+# Top topic result
+top_docs_num <- lda_fit$document_sums %>% top.topic.documents(5)
+top_words <- lda_fit$topics %>% top.topic.words(num.words = 5, by.score = TRUE) %>% 
+  data.frame() %>% data.table()
+
+top_words %>% 
+  knitr::kable("html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+## FB - 「阮厝住三芝」社團
+
+[阮厝住三芝](https://www.facebook.com/groups/451870225491/about/)
+
+- 資料期間：2015-01-01 ~ 2017-12-28
+- 273 篇發文，含回應留言 (手動排除買賣文 13 篇後)
+
+### 關鍵字
+
+- [關鍵字文字雲 (Click)](/output/fb_keyword_wordcloud.html)
+
+
+### LDA 主題模型
+
++ [LDAvis (Click)](output/ldavis_fb/)
++ 參數
+    - n_topic: 20
+    - num.iterations: 3000
+    - alpha: 0.02
+    - eta: 0.02
+
+```{r}
+lda_fit <- readRDS("./models/lda_fit_fb.Rds")
 # Top topic result
 top_docs_num <- lda_fit$document_sums %>% top.topic.documents(5)
 top_words <- lda_fit$topics %>% top.topic.words(num.words = 5, by.score = TRUE) %>% 
